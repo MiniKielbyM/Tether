@@ -1,0 +1,18 @@
+{
+    "name": "Go + Websocat DevContainer",
+    "image": "mcr.microsoft.com/devcontainers/go:1-ubuntu",
+    "postCreateCommand": "sudo apt update && sudo apt install -y websocat",
+    "features": {
+      "ghcr.io/devcontainers/features/go:1": {
+        "version": "latest"
+      }
+    },
+    "customizations": {
+      "vscode": {
+        "extensions": [
+          "golang.Go"
+        ]
+      }
+    }
+  }
+  
