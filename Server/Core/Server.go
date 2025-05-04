@@ -1,4 +1,4 @@
-package main
+package Core
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 )
 
 var upgrader = websocket.Upgrader{}
-var config, err = Config.LoadConfig("config.json")
+var config, err = Config.LoadConfig("../config.json")
 
 // prevent blocking of the main thread
 func startServer() {
@@ -48,7 +48,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func main() {
+func StartServer() {
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
