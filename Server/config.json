@@ -1,5 +1,6 @@
 {
     "Name": "MyServer",
     "Version": "0.0.0",
+    "Protocol": "http",
     "Port": 8080
 }
