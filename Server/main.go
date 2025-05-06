@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	go Core.StartServer() // Start the server in a goroutine
+	Core.StartServer()
 }

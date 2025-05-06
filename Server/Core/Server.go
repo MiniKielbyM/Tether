@@ -1,6 +1,7 @@
 package Core
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 var upgrader = websocket.Upgrader{}
-var config, err = Config.LoadConfig("../config.json")
+var config, err = Config.LoadServerConfig("config.json")
 
 // prevent blocking of the main thread
 func startServer() {
@@ -29,21 +30,22 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close()
+	fmt.Printf("Client connected %s\n", conn.RemoteAddr())
 
 	for {
 		// Read message
-		typ, msg, err := conn.ReadMessage()
+		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			log.Println("Read error:", err)
 			return
 		}
-		fmt.Printf("Received: %s\n", msg)
-
-		// Echo it back
-		if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
-			log.Println("Write error:", err)
+		var message Message
+		if err := json.Unmarshal(msg, &message); err != nil {
+			log.Printf("Error unmarshaling message: %v", err)
 		}
-		fmt.Printf("Message type: %d\n", typ)
+		message.Sender = conn.RemoteAddr().String()
+		msg, _ = json.Marshal(message)
+		route(msg)
 		time.Sleep(10 * time.Millisecond)
 	}
 }
@@ -55,13 +57,13 @@ func StartServer() {
 	go startServer()        // Start the server in a goroutine
 	time.Sleep(time.Second) // Give the server a second to start
 	if config.Name == "" && config.Version == "" {
-		fmt.Printf("Tether server started on %s://%s:%s\n", config.Protocol, config.Host, fmt.Sprint(config.Port))
+		fmt.Printf("Tether server started on port %s\n", fmt.Sprint(config.Port))
 	} else if config.Name == "" && config.Version != "" {
-		fmt.Printf("Tether server(v%s) started on %s://%s:%s\n", config.Version, config.Protocol, config.Host, fmt.Sprint(config.Port))
+		fmt.Printf("Tether server(v%s) started on port %s\n", config.Version, fmt.Sprint(config.Port))
 	} else if config.Name != "" && config.Version == "" {
-		fmt.Printf("Tether server %s started on %s://%s:%s\n", config.Name, config.Protocol, config.Host, fmt.Sprint(config.Port))
+		fmt.Printf("Tether server %s started on port %s\n", config.Name, fmt.Sprint(config.Port))
 	} else {
-		fmt.Printf("Tether server %s(v%s) started on %s://%s:%s\n", config.Name, config.Version, config.Protocol, config.Host, fmt.Sprint(config.Port))
+		fmt.Printf("Tether server %s(v%s) started on port %s\n", config.Name, config.Version, fmt.Sprint(config.Port))
 	}
 	select {} // Block forever
 }
