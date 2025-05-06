@@ -1,7 +1,12 @@
 {
     "Server": {
-        "Name": "MyServer",
+        "Name": "DEMOS",
         "Version": "0.0.0",
         "Port": 8080
+    },
+    "Room":{
+        "passwordLength": 4,
+        "roomsPerHost": 1,
+        "hostCanJoin": false
     }
 }

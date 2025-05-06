@@ -9,6 +9,9 @@ type JoinJson struct {
 	RoomID string `json:"roomId"`
 	User   string `json:"user"`
 }
+type CloseJson struct {
+	Password string `json:"password"`
+}
 type RoomData struct {
 	Host     string   `json:"host"`
 	RoomID   string   `json:"roomId"`

@@ -6,9 +6,16 @@ import (
 	"os"
 )
 
+type Config struct {
+	Server ServerConfig `json:"Server"`
+	Room   RoomConfig   `json:"Room"`
+}
+
 type RoomConfig struct {
 	PasswordLength int `json:"passwordLength"`
+	RoomsPerHost   int `json:"roomsPerHost"`
 }
+
 type ServerConfig struct {
 	Name     string `json:"name"`
 	Version  string `json:"version"`
@@ -16,44 +23,33 @@ type ServerConfig struct {
 	Port     int    `json:"port"`
 }
 
-func LoadServerConfig(filePath string) (ServerConfig, error) {
-	var config ServerConfig
+// Load the entire config (both Server and Room)
+func LoadConfig(filePath string) (Config, error) {
+	var config Config
 
-	// Read the content of index.js file (which is JSON)
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return config, fmt.Errorf("error reading file: %v", err)
 	}
-	if config.Protocol == "" {
-		config.Protocol = "http"
-	}
-	if config.Port == 0 {
-		config.Port = 8080
-	}
-	// Unmarshal the JSON data into the Config struct
+
 	err = json.Unmarshal(data, &config)
 	if err != nil {
 		return config, fmt.Errorf("error unmarshaling JSON: %v", err)
 	}
 
-	return config, nil
-}
+	// Apply defaults if necessary
+	if config.Server.Protocol == "" {
+		config.Server.Protocol = "http"
+	}
+	if config.Server.Port == 0 {
+		config.Server.Port = 8080
+	}
+	if config.Room.PasswordLength < 1 {
+		config.Room.PasswordLength = 1
+	}
+	if config.Room.RoomsPerHost < 1 {
+		config.Room.RoomsPerHost = 1
+	}
 
-func LoadRoomConfig(filePath string) (RoomConfig, error) {
-	var config RoomConfig
-
-	// Read the content of index.js file (which is JSON)
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return config, fmt.Errorf("error reading file: %v", err)
-	}
-	// Unmarshal the JSON data into the Config struct
-	err = json.Unmarshal(data, &config)
-	if err != nil {
-		return config, fmt.Errorf("error unmarshaling JSON: %v", err)
-	}
-	if config.PasswordLength < 1 {
-		config.PasswordLength = 4
-	}
 	return config, nil
 }

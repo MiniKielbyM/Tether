@@ -12,7 +12,7 @@ func route(msg []byte) {
 		log.Printf("Error unmarshaling message: %v", err)
 	}
 	switch message.Type {
-	case "join", "create":
+	case "join", "create", "close":
 		Room(msg)
 	default:
 		fmt.Printf("[Unknown type] %s\n", message.Type)
