@@ -2,9 +2,12 @@ package Core
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/MiniKielbyM/Tether/Server/Config"
@@ -30,15 +33,20 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer conn.Close()
-	fmt.Printf("Client connected %s\n", conn.RemoteAddr())
+	log.Printf("Client connected %s\n", conn.RemoteAddr())
 
 	for {
 		// Read message
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
-			log.Println("Read error:", err)
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) || strings.Contains(err.Error(), "unexpected EOF") || errors.Is(err, io.EOF) {
+				log.Printf("client disconnected: %s\n", conn.RemoteAddr())
+			} else {
+				log.Printf("Error reading message: %v\n", err)
+			}
 			return
 		}
+
 		var message Message
 		if err := json.Unmarshal(msg, &message); err != nil {
 			log.Printf("Error unmarshaling message: %v", err)
@@ -50,15 +58,15 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func startupMsg(){
+func startupMsg() {
 	if config.Server.Name == "" && config.Server.Version == "" {
-		fmt.Printf("Tether server started on port %s\n", fmt.Sprint(config.Server.Port))
+		log.Printf("Tether server started on port %s\n", fmt.Sprint(config.Server.Port))
 	} else if config.Server.Name == "" && config.Server.Version != "" {
-		fmt.Printf("Tether server(v%s) started on port %s\n", config.Server.Version, fmt.Sprint(config.Server.Port))
+		log.Printf("Tether server(v%s) started on port %s\n", config.Server.Version, fmt.Sprint(config.Server.Port))
 	} else if config.Server.Name != "" && config.Server.Version == "" {
-		fmt.Printf("Tether server %s started on port %s\n", config.Server.Name, fmt.Sprint(config.Server.Port))
+		log.Printf("Tether server %s started on port %s\n", config.Server.Name, fmt.Sprint(config.Server.Port))
 	} else {
-		fmt.Printf("Tether server %s(v%s) started on port %s\n", config.Server.Name, config.Server.Version, fmt.Sprint(config.Server.Port))
+		log.Printf("Tether server %s(v%s) started on port %s\n", config.Server.Name, config.Server.Version, fmt.Sprint(config.Server.Port))
 	}
 }
 

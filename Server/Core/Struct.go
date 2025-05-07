@@ -1,5 +1,14 @@
 package Core
 
+type UserRole string
+
+const (
+	WsConn UserRole = ""
+	Client UserRole = "client"
+	Guest  UserRole = "guest"
+	null   UserRole = ""
+)
+
 type Message struct {
 	Sender string      `json:"sender"` //for server use only
 	Type   string      `json:"type"`
@@ -17,4 +26,11 @@ type RoomData struct {
 	RoomID   string   `json:"roomId"`
 	Password string   `json:"password"`
 	Clients  []string `json:"clients"`
+}
+type User struct {
+	WsConn   string
+	Role     UserRole
+	RoomID   string
+	Username string
+	Meta     interface{}
 }

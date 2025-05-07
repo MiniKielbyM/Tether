@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"strings"
+
 	"github.com/MiniKielbyM/Tether/Server/Config"
 	"github.com/google/uuid"
 )
@@ -29,7 +30,15 @@ func createRoom(host string, passwordLength int) (RoomData, error) {
 
 func closeRoom(host string, password string) {
 	for i, room := range Rooms {
-		if room.Host == host && room.Password == password{
+		if room.Host == host && room.Password == password {
+			Rooms = append(Rooms[:i], Rooms[i+1:]...)
+		}
+	}
+}
+
+func closeAll(host string) {
+	for i, room := range Rooms {
+		if room.Host == host {
 			Rooms = append(Rooms[:i], Rooms[i+1:]...)
 		}
 	}
@@ -54,7 +63,7 @@ func Room(msg []byte) {
 	config, _ := Config.LoadConfig("config.json")
 	var message Message
 	if err := json.Unmarshal(msg, &message); err != nil {
-		log.Print("Error unmarshaling message: %v", err)
+		log.Printf("Error unmarshaling message: %v", err)
 	}
 	switch strings.ToLower(message.Type) {
 	case "join":
@@ -77,6 +86,9 @@ func Room(msg []byte) {
 			fmt.Printf("[Close] %v\n", data)
 		}
 		closeRoom(message.Sender, data.Password)
+	case "closeall":
+		closeAll(message.Sender)
+		fmt.Printf("[CloseAll] %s\n", message.Sender)
 	default:
 		fmt.Printf("[Unknown type] %s\n", message.Type)
 	}
