@@ -9,11 +9,7 @@ import (
 type Config struct {
 	Server ServerConfig `json:"Server"`
 	Room   RoomConfig   `json:"Room"`
-}
-
-type RoomConfig struct {
-	PasswordLength int `json:"passwordLength"`
-	RoomsPerHost   int `json:"roomsPerHost"`
+	Api ApiConfig `json:"Api"`
 }
 
 type ServerConfig struct {
@@ -21,6 +17,20 @@ type ServerConfig struct {
 	Version  string `json:"version"`
 	Protocol string `json:"protocol"`
 	Port     int    `json:"port"`
+}
+
+type RoomConfig struct {
+	PasswordLength int `json:"passwordLength"`
+	RoomsPerHost   int `json:"roomsPerHost"`
+}
+
+type ApiConfig struct {
+	Dev DevConfig `json:"Dev"`
+}
+
+type DevConfig struct {
+	Enabled bool `json:"enabled"`
+	Port int `json:"port"`
 }
 
 // Load the entire config (both Server and Room)
@@ -41,7 +51,7 @@ func LoadConfig(filePath string) (Config, error) {
 	if config.Server.Protocol == "" {
 		config.Server.Protocol = "http"
 	}
-	if config.Server.Port == 0 {
+	if config.Server.Port < 1 {
 		config.Server.Port = 8080
 	}
 	if config.Room.PasswordLength < 1 {

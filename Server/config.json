@@ -1,12 +1,22 @@
 {
     "Server": {
-        "Name": "DEMOS",
-        "Version": "0.0.0",
-        "Port": 8080
+        "name": "DEMOS",
+        "version": "0.0.0",
+        "port": 8080
     },
     "Room":{
         "passwordLength": 4,
         "roomsPerHost": 1,
         "hostCanJoin": false
+    },
+    "Api":{
+        "Dev":{
+            "enabled": true,
+            "port": 8080
+        },
+        "Pub": {
+            "enabled": true,
+            "port": 5050
+        }
     }
 }

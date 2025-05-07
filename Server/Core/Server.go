@@ -16,6 +16,7 @@ import (
 
 var upgrader = websocket.Upgrader{}
 var config, err = Config.LoadConfig("config.json")
+var clients = make(map[string]*websocket.Conn)
 
 // prevent blocking of the main thread
 func startServer() {
@@ -34,13 +35,14 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 	log.Printf("Client connected %s\n", conn.RemoteAddr())
-
+	clients[conn.RemoteAddr().String()] = conn
+	SendToClient(conn.RemoteAddr().String(),"[-hello world-]")
 	for {
 		// Read message
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) || strings.Contains(err.Error(), "unexpected EOF") || errors.Is(err, io.EOF) {
-				log.Printf("client disconnected: %s\n", conn.RemoteAddr())
+				delete(clients, conn.RemoteAddr().String())
 			} else {
 				log.Printf("Error reading message: %v\n", err)
 			}
@@ -78,4 +80,12 @@ func StartServer() {
 	time.Sleep(time.Second) // Give the server a second to start
 	startupMsg()
 	select {} // Block forever
+}
+
+func SendToClient(id string, message string) error {
+	conn, ok := clients[id]
+	if !ok {
+		return fmt.Errorf("client %s not connected", id)
+	}
+	return conn.WriteMessage(websocket.TextMessage, []byte(message))
 }
