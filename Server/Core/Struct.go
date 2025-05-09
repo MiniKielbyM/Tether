@@ -36,6 +36,5 @@ type User struct {
 }
 
 type PageData struct {
-	Title   string
-	Content string
+	Name string
 }

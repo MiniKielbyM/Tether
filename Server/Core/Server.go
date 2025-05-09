@@ -99,8 +99,7 @@ func StartApiServer() {
 	go func() {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			data := PageData{
-				Title:   "Welcome to Tether",
-				Content: "This is your homepage rendered from a Go template.",
+				Name:   config.Server.Name,
 			}
 			RenderPage(w, "API/templates/index.html", data)
 			time.Sleep(10 * time.Millisecond)
