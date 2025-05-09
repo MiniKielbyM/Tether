@@ -12,11 +12,7 @@
     "Api":{
         "Dev":{
             "enabled": true,
-            "port": 8080
-        },
-        "Pub": {
-            "enabled": true,
-            "port": 5050
+            "port": 6060
         }
     }
 }

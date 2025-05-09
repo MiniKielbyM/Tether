@@ -9,7 +9,7 @@ import (
 type Config struct {
 	Server ServerConfig `json:"Server"`
 	Room   RoomConfig   `json:"Room"`
-	Api ApiConfig `json:"Api"`
+	Api    ApiConfig    `json:"Api"`
 }
 
 type ServerConfig struct {
@@ -30,7 +30,7 @@ type ApiConfig struct {
 
 type DevConfig struct {
 	Enabled bool `json:"enabled"`
-	Port int `json:"port"`
+	Port    int  `json:"port"`
 }
 
 // Load the entire config (both Server and Room)
@@ -59,6 +59,16 @@ func LoadConfig(filePath string) (Config, error) {
 	}
 	if config.Room.RoomsPerHost < 1 {
 		config.Room.RoomsPerHost = 1
+	}
+	if config.Api.Dev.Port < 1 {
+		config.Api.Dev.Port = 8081
+	}
+	if config.Api.Dev.Port == config.Server.Port {
+		config.Api.Dev.Port = config.Api.Dev.Port - 1
+		if config.Api.Dev.Port < 1 {
+			config.Api.Dev.Port = 8081
+		}
+		fmt.Printf("API port cannot be the same as server port, changing API port to %d\n", config.Api.Dev.Port)
 	}
 
 	return config, nil

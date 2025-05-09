@@ -34,3 +34,8 @@ type User struct {
 	Username string
 	Meta     interface{}
 }
+
+type PageData struct {
+	Title   string
+	Content string
+}

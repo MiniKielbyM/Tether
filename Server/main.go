@@ -5,5 +5,7 @@ import (
 )
 
 func main() {
-	Core.StartServer()
+	Core.StartApiServer()
+	Core.StartWsServer()
+	select {} //block forever
 }

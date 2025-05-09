@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -36,7 +37,7 @@ func handleWS(w http.ResponseWriter, r *http.Request) {
 	defer conn.Close()
 	log.Printf("Client connected %s\n", conn.RemoteAddr())
 	clients[conn.RemoteAddr().String()] = conn
-	SendToClient(conn.RemoteAddr().String(),"[-hello world-]")
+	SendToClient(conn.RemoteAddr().String(), "[-hello world-]")
 	for {
 		// Read message
 		_, msg, err := conn.ReadMessage()
@@ -72,14 +73,43 @@ func startupMsg() {
 	}
 }
 
-func StartServer() {
+func StartWsServer() {
 	if err != nil {
 		log.Fatalf("Error loading config: %v", err)
 	}
 	go startServer()        // Start the server in a goroutine
 	time.Sleep(time.Second) // Give the server a second to start
 	startupMsg()
-	select {} // Block forever
+}
+func RenderPage(w http.ResponseWriter, tmplPath string, data interface{}) {
+	tmpl, err := template.ParseFiles(tmplPath)
+	if err != nil {
+		http.Error(w, "Template parsing error", http.StatusInternalServerError)
+		log.Println("Template error:", err)
+		return
+	}
+
+	if err := tmpl.Execute(w, data); err != nil {
+		http.Error(w, "Template execution error", http.StatusInternalServerError)
+		log.Println("Execution error:", err)
+	}
+}
+
+func StartApiServer() {
+	go func() {
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			data := PageData{
+				Title:   "Welcome to Tether",
+				Content: "This is your homepage rendered from a Go template.",
+			}
+			RenderPage(w, "API/templates/index.html", data)
+			time.Sleep(10 * time.Millisecond)
+		})
+		if err := http.ListenAndServe(":"+fmt.Sprint(config.Api.Dev.Port), nil); err != nil {
+			log.Fatalf("HTML server failed to start: %v", err)
+		}
+	}()
+	log.Printf("Developer API server started on port %s\n", fmt.Sprint(config.Api.Dev.Port))
 }
 
 func SendToClient(id string, message string) error {
