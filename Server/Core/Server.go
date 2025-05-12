@@ -99,9 +99,9 @@ func StartApiServer() {
 	go func() {
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			data := PageData{
-				Name:   config.Server.Name,
+				Name: config.Server.Name,
 			}
-			RenderPage(w, "API/templates/index.html", data)
+			RenderPage(w, "Core/HTML/API.Html", data)
 			time.Sleep(10 * time.Millisecond)
 		})
 		if err := http.ListenAndServe(":"+fmt.Sprint(config.Api.Dev.Port), nil); err != nil {
