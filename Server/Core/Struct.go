@@ -36,5 +36,10 @@ type User struct {
 }
 
 type PageData struct {
-	Name string
+	Name      string
+	Version   string
+	Port      int
+	RoomCount int
+	UserCount int
+	Load      float64
 }
